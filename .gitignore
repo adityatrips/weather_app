@@ -49,3 +49,6 @@ env.json
 *.pem
 output.zip
 pepk.jar
+assets/icon_playstore.png
+
+.vscode

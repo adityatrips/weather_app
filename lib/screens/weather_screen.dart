@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:weather_app/global/state.dart';
 import 'package:weather_app/models/weather_model.dart';
 import 'package:weather_app/service/weather_service.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -16,7 +17,10 @@ class WeatherPage extends StatefulWidget {
 
 class _WeatherPageState extends State<WeatherPage> {
   final _weatherService = WeatherService(
-    const String.fromEnvironment('OPENWEATHERMAP_API_KEY', defaultValue: ""),
+    const String.fromEnvironment(
+      'OPENWEATHERMAP_API_KEY',
+      defaultValue: "",
+    ),
   );
   Weather? _weather;
   bool loading = true;
@@ -132,21 +136,28 @@ class _WeatherPageState extends State<WeatherPage> {
       body: SafeArea(
         child: Center(
           child: loading
-              ? const CircularProgressIndicator()
+              ? LoadingAnimationWidget.staggeredDotsWave(
+                  color: Get.theme.primaryColor,
+                  size: 50,
+                )
               : Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
                       _weather?.cityName ?? "...",
+                      textAlign: TextAlign.center,
                       style: GoogleFonts.bebasNeue(
-                          fontWeight: FontWeight.bold, fontSize: 80),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 64,
+                      ),
                     ),
                     Lottie.asset(_getWeatherAnimation(_weather?.mainCondition)),
                     Text(
                       _weather?.temperature.round() == null
                           ? "..."
                           : "${_weather?.temperature.round()}°",
+                      textAlign: TextAlign.center,
                       style: GoogleFonts.bebasNeue(
                         fontSize: 60,
                       ),
