@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:weather_app/global/state.dart';
+import 'package:provider/provider.dart';
 import 'package:weather_app/models/weather_model.dart';
+import 'package:weather_app/provider/ThemeProvider.dart';
 import 'package:weather_app/service/weather_service.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -17,10 +16,7 @@ class WeatherPage extends StatefulWidget {
 
 class _WeatherPageState extends State<WeatherPage> {
   final _weatherService = WeatherService(
-    const String.fromEnvironment(
-      'OPENWEATHERMAP_API_KEY',
-      defaultValue: "",
-    ),
+    dotenv.env["OWM_API"]!,
   );
   Weather? _weather;
   bool loading = true;
@@ -84,86 +80,48 @@ class _WeatherPageState extends State<WeatherPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
-      persistentFooterAlignment: AlignmentDirectional.center,
-      persistentFooterButtons: [
-        OutlinedButton.icon(
-          onPressed: () {
-            _fetchWeather();
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          theme.toggleTheme();
+        },
+        shape: const CircleBorder(),
+        child: theme.isDarkMode
+            ? const Icon(Icons.light_mode)
+            : const Icon(Icons.dark_mode),
+      ),
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await _fetchWeather();
           },
-          icon: const Icon(
-            Icons.refresh,
-          ),
-          label: Text(
-            "Refresh",
-            style: GoogleFonts.bebasNeue(),
-          ),
-        ),
-        OutlinedButton.icon(
-          onPressed: () {
-            Get.find<ThemeController>().toggleTheme();
-          },
-          icon: Obx(
-            () => Icon(
-              Get.find<ThemeController>().isDarkMode.value
-                  ? Icons.light_mode_rounded
-                  : Icons.dark_mode_rounded,
+          child: Center(
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                Text(
+                  _weather?.cityName ?? "...",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.bebasNeue(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 64,
+                  ),
+                ),
+                Lottie.asset(_getWeatherAnimation(_weather?.mainCondition)),
+                Text(
+                  _weather?.temperature.round() == null
+                      ? "..."
+                      : "${_weather?.temperature.round()}°",
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.bebasNeue(
+                    fontSize: 60,
+                  ),
+                ),
+              ],
             ),
           ),
-          label: Text(
-            "Toggle theme",
-            style: GoogleFonts.bebasNeue(),
-          ),
-        ),
-        OutlinedButton.icon(
-          onPressed: () async {
-            await launchUrl(
-              Uri.parse("https://github.com/adityatrips"),
-              browserConfiguration: const BrowserConfiguration(
-                showTitle: true,
-              ),
-            );
-          },
-          icon: const Icon(
-            Icons.person_rounded,
-          ),
-          label: Text(
-            "Meet the developer",
-            style: GoogleFonts.bebasNeue(),
-          ),
-        )
-      ],
-      body: SafeArea(
-        child: Center(
-          child: loading
-              ? LoadingAnimationWidget.staggeredDotsWave(
-                  color: Get.theme.primaryColor,
-                  size: 50,
-                )
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      _weather?.cityName ?? "...",
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.bebasNeue(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 64,
-                      ),
-                    ),
-                    Lottie.asset(_getWeatherAnimation(_weather?.mainCondition)),
-                    Text(
-                      _weather?.temperature.round() == null
-                          ? "..."
-                          : "${_weather?.temperature.round()}°",
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.bebasNeue(
-                        fontSize: 60,
-                      ),
-                    ),
-                  ],
-                ),
         ),
       ),
     );
