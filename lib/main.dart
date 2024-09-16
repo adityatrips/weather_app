@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
                     left: 0,
                     right: 0,
                     child: SizedBox(
-                      height: MediaQuery.of(context).size.height - 100,
+                      height: MediaQuery.of(context).size.height * 0.9,
                       child: const WeatherPage(),
                     ),
                   ),

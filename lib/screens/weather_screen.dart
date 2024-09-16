@@ -119,6 +119,18 @@ class _WeatherPageState extends State<WeatherPage> {
                     fontSize: 60,
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    "Consider clicking on the ad to support my work! I won't force you to, but it would be highly appreciated!",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.dmSans(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                SizedBox(height: MediaQuery.sizeOf(context).height * 0.1),
               ],
             ),
           ),
