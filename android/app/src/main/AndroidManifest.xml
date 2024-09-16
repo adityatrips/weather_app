@@ -8,6 +8,9 @@
         android:label="Minimal Weather App"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-5931956401636205~2425299119"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"
