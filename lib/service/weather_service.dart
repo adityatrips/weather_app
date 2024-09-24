@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'dart:developer';
-
-import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:permission_handler/permission_handler.dart';
@@ -13,9 +11,13 @@ class WeatherService {
 
   WeatherService(this.apiKey);
 
-  Future<Weather> getWeather(String cityName) async {
+  Future<Weather> getWeather(Position position) async {
+    log('$baseUrl?lat=${position.latitude}&lon=${position.longitude}&appid=$apiKey&units=metric');
+
     final response = await http.get(
-      Uri.parse('$baseUrl?q=$cityName&appid=$apiKey&units=metric'),
+      Uri.parse(
+        '$baseUrl?lat=${position.latitude}&lon=${position.longitude}&appid=$apiKey&units=metric',
+      ),
     );
 
     if (response.statusCode == 200) {
@@ -25,7 +27,7 @@ class WeatherService {
     }
   }
 
-  Future<String> getCurrentCity() async {
+  Future<Position> getCurrentCity() async {
     Permission locationPermission = Permission.location;
     PermissionStatus status = await locationPermission.request();
 
@@ -37,13 +39,6 @@ class WeatherService {
 
     Position position = await Geolocator.getCurrentPosition();
 
-    List<Placemark> placemarks = await placemarkFromCoordinates(
-      position.latitude,
-      position.longitude,
-    );
-
-    String? city = placemarks[0].locality;
-
-    return city ?? "";
+    return position;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -26,10 +27,10 @@ class _WeatherPageState extends State<WeatherPage> {
       loading = true;
     });
 
-    String cityName = await _weatherService.getCurrentCity();
+    Position cityPosition = await _weatherService.getCurrentCity();
 
     try {
-      final weather = await _weatherService.getWeather(cityName);
+      final weather = await _weatherService.getWeather(cityPosition);
       setState(() {
         _weather = weather;
       });

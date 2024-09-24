@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       builder: (context, _) {
-        final theme = Provider.of<ThemeProvider>(context);
+        final theme = context.watch<ThemeProvider>();
 
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
