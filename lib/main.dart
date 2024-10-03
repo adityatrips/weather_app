@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:weather_app/ads/banner_ad_unit.dart';
 import 'package:weather_app/pages/weather_page.dart';
 import 'package:weather_app/provider/ApiProvider.dart';
-import 'package:weather_app/provider/globals.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -18,9 +19,7 @@ Future<void> main() async {
   Future.delayed(const Duration(seconds: 2), () {
     FlutterNativeSplash.remove();
   });
-  await GetStorage.init();
   await dotenv.load(fileName: '.env');
-
   runApp(const MyApp());
 }
 
@@ -32,11 +31,15 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  bool loading = true;
+
   void requestPermission() async {
     final PermissionStatus status = await Permission.location.request();
 
     if (status == PermissionStatus.denied) {
-      requestPermission();
+      await Geolocator.openLocationSettings();
+    } else {
+      return;
     }
   }
 
@@ -44,48 +47,55 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     requestPermission();
+    setState(() {
+      loading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        Provider(create: (_) => ApiNotifier()),
+        ChangeNotifierProvider(create: (_) => ApiNotifier()),
       ],
       child: GetMaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Weather app',
-        theme: lightTheme,
-        darkTheme: darkTheme,
-        home: SafeArea(
+        theme: ThemeData(
+          scaffoldBackgroundColor: Colors.black,
+          colorScheme: const ColorScheme(
+            brightness: Brightness.dark,
+            primary: Colors.blue,
+            onPrimary: Colors.white,
+            primaryContainer: Colors.blue,
+            onPrimaryContainer: Colors.white,
+            secondary: Colors.blue,
+            onSecondary: Colors.white,
+            secondaryContainer: Colors.blue,
+            onSecondaryContainer: Colors.white,
+            error: Colors.redAccent,
+            onError: Colors.red,
+            errorContainer: Colors.redAccent,
+            onErrorContainer: Colors.white,
+            outline: Color.fromRGBO(189, 189, 189, 1),
+            surface: Color.fromRGBO(33, 33, 33, 1),
+            onSurface: Colors.white,
+            onSurfaceVariant: Colors.white,
+          ),
+        ),
+        home: const SafeArea(
           child: Scaffold(
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.miniStartFloat,
-            floatingActionButton: FloatingActionButton.extended(
-              onPressed: () {
-                Get.changeThemeMode(
-                  Get.isDarkMode ? ThemeMode.light : ThemeMode.dark,
-                );
-              },
-              label: const Text("Toggle theme"),
-              icon: Icon(
-                Get.isDarkMode ? Icons.wb_sunny : Icons.nightlight_round,
-              ),
-            ),
             body: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Stack(
                 children: [
                   Positioned(
-                    bottom: 0,
+                    top: 75,
                     left: 0,
                     right: 0,
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.9,
-                      child: const WeatherPage(),
-                    ),
+                    child: WeatherPage(),
                   ),
-                  const Positioned(
+                  Positioned(
                     top: 0,
                     left: 0,
                     right: 0,

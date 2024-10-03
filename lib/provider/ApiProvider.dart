@@ -1,12 +1,14 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get/get.dart';
 import 'package:weather_app/models/weather_model.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
-class ApiNotifier {
+class ApiNotifier extends ChangeNotifier {
   final Dio dio = Dio(
     BaseOptions(
       baseUrl: "https://api.openweathermap.org",
@@ -19,6 +21,7 @@ class ApiNotifier {
   );
 
   ApiNotifier() {
+    log(dotenv.env["OWM_API"]!);
     getWeather();
   }
 
@@ -28,12 +31,7 @@ class ApiNotifier {
   String? cityName;
 
   Future<void> getPosition() async {
-    Position position = await Geolocator.getCurrentPosition(
-      locationSettings: LocationSettings(
-        accuracy: LocationAccuracy.low,
-        distanceFilter: 500,
-      ),
-    );
+    Position position = await Geolocator.getCurrentPosition();
     final locationDetails = await placemarkFromCoordinates(
       position.latitude,
       position.longitude,
@@ -55,9 +53,13 @@ class ApiNotifier {
       );
 
       weather = WeatherModel.fromJson(response.data);
+      log("${position!.latitude}, ${position!.longitude}");
+      log("${weather!.current.temp}");
+      log("$cityName");
     } catch (e) {
-      log(e.toString());
       weather = null;
+    } finally {
+      notifyListeners();
     }
   }
 }

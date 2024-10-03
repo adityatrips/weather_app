@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:weather_app/provider/ApiProvider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class WeatherPage extends StatefulWidget {
   const WeatherPage({super.key});
@@ -50,62 +49,54 @@ class _WeatherPageState extends State<WeatherPage> {
     final cityName = context.watch<ApiNotifier?>()?.cityName;
 
     if (data == null) {
-      return Center(
-        child: LoadingAnimationWidget.staggeredDotsWave(
-          color: Theme.of(context).colorScheme.primary,
-          size: 75,
-        ),
-      );
-    } else {
-      return RefreshIndicator(
-        onRefresh: () async {
-          await context.read<ApiNotifier>().getWeather();
-        },
-        child: ListView(
-          shrinkWrap: true,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 20),
-              child: Text(
-                "Please consider clicking the ad above. I won't force you to do it, but it would be nice if you did. I am a student and I need to pay my bills. Thanks for your support!",
-                style: GoogleFonts.dmSans(
-                  fontSize: 14,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-            Text(
-              data.current.weather[0].description.toUpperCase(),
-              // "",
-              style: GoogleFonts.oswald(
-                fontSize: 60,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            Lottie.asset(
-              _getWeatherAnimation(
-                data.current.weather[0].main,
-              ),
-              animate: true,
-              fit: BoxFit.cover,
-            ),
-            Text(
-              cityName!,
-              style: GoogleFonts.dmSans(
-                fontSize: 20,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            Text(
-              "${data.current.temp} °C",
-              style: GoogleFonts.oswald(
-                fontSize: 30,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      );
+      context.read<ApiNotifier>().getWeather();
     }
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        await context.read<ApiNotifier>().getWeather();
+      },
+      child: ListView(
+        shrinkWrap: true,
+        children: [
+          Text(
+            "Please consider clicking the ad above. I won't force you to do it, but it would be nice if you did. I am a student and I need to pay my bills. Thanks for your support!",
+            style: GoogleFonts.dmSans(
+              fontSize: 14,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          Text(
+            data?.current.weather[0].description.toUpperCase() ?? "...",
+            // "",
+            style: GoogleFonts.oswald(
+              fontSize: 60,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          Lottie.asset(
+            _getWeatherAnimation(
+              data?.current.weather[0].main ?? "...",
+            ),
+            animate: true,
+            fit: BoxFit.cover,
+          ),
+          Text(
+            cityName ?? "...",
+            style: GoogleFonts.dmSans(
+              fontSize: 20,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          Text(
+            "${data?.current.temp ?? "0"} °C",
+            style: GoogleFonts.oswald(
+              fontSize: 30,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
   }
 }

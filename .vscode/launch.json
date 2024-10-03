@@ -2,18 +2,18 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "minimalist_weather",
+			"name": "weather_app",
 			"request": "launch",
 			"type": "dart"
 		},
 		{
-			"name": "minimalist_weather (profile mode)",
+			"name": "weather_app (profile mode)",
 			"request": "launch",
 			"type": "dart",
 			"flutterMode": "profile"
 		},
 		{
-			"name": "minimalist_weather (release mode)",
+			"name": "weather_app (release mode)",
 			"request": "launch",
 			"type": "dart",
 			"flutterMode": "release"

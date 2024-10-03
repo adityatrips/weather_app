@@ -1,4 +1,4 @@
-package com.adityatripathi.minimalist_weather
+package com.adityatripathi.weather_app
 
 import io.flutter.embedding.android.FlutterActivity
 
