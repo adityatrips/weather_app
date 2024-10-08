@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:weather_app/ads/banner_ad_unit.dart';
@@ -17,6 +18,7 @@ Future<void> main() async {
   Future.delayed(const Duration(seconds: 2), () {
     FlutterNativeSplash.remove();
   });
+  await GetStorage.init();
   await dotenv.load(fileName: '.env');
   runApp(const MyApp());
 }

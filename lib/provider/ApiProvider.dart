@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:weather_app/models/weather_model.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -11,6 +12,8 @@ import 'package:geocoding/geocoding.dart';
 class ApiNotifier extends ChangeNotifier {
   final int lastApiCalled = DateTime.now().millisecondsSinceEpoch;
   final int apiInterval = 1000 * 60 * 10;
+
+  final box = GetStorage();
 
   final Dio dio = Dio(
     BaseOptions(
@@ -32,6 +35,7 @@ class ApiNotifier extends ChangeNotifier {
 
   Position? position;
   String? cityName;
+  double? temperature;
 
   Future<void> getPosition() async {
     Position position = await Geolocator.getCurrentPosition();
@@ -48,6 +52,13 @@ class ApiNotifier extends ChangeNotifier {
     final currentTime = DateTime.now().millisecondsSinceEpoch;
     if ((currentTime - lastApiCalled < apiInterval) && weather != null) {
       log("API call skipped to respect interval");
+      Get.snackbar(
+        "Error",
+        "API call skipped to respect interval, using cached data.",
+      );
+      weather = null;
+      cityName = box.read("cityName");
+      temperature = box.read("temperature");
       return;
     }
 
@@ -67,8 +78,13 @@ class ApiNotifier extends ChangeNotifier {
       log("${position!.latitude}, ${position!.longitude}");
       log("${weather!.current.temp}");
       log("$cityName");
+
+      box.writeInMemory("cityName", cityName!);
+      box.writeInMemory("temperature", weather!.current.temp);
     } catch (e) {
       weather = null;
+      cityName = box.read("cityName");
+      temperature = box.read("temperature");
     } finally {
       notifyListeners();
     }

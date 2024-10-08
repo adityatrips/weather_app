@@ -46,6 +46,7 @@ class _WeatherPageState extends State<WeatherPage> {
   @override
   Widget build(BuildContext context) {
     final data = context.watch<ApiNotifier?>()?.weather;
+    final temperature = context.watch<ApiNotifier?>()?.temperature;
     final cityName = context.watch<ApiNotifier?>()?.cityName;
 
     if (data == null) {
@@ -67,8 +68,8 @@ class _WeatherPageState extends State<WeatherPage> {
             textAlign: TextAlign.center,
           ),
           Text(
-            data?.current.weather[0].description.toUpperCase() ?? "...",
-            // "",
+            data?.current.weather[0].description.toUpperCase() ??
+                "Clear Sky (cached)",
             style: GoogleFonts.oswald(
               fontSize: 60,
             ),
@@ -76,20 +77,20 @@ class _WeatherPageState extends State<WeatherPage> {
           ),
           Lottie.asset(
             _getWeatherAnimation(
-              data?.current.weather[0].main ?? "...",
+              data?.current.weather[0].main,
             ),
             animate: true,
             fit: BoxFit.cover,
           ),
           Text(
-            cityName ?? "...",
+            cityName ?? "",
             style: GoogleFonts.dmSans(
               fontSize: 20,
             ),
             textAlign: TextAlign.center,
           ),
           Text(
-            "${data?.current.temp ?? "0"} °C",
+            "${temperature ?? "0"} °C",
             style: GoogleFonts.oswald(
               fontSize: 30,
             ),
