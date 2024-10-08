@@ -10,7 +10,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
 class ApiNotifier extends ChangeNotifier {
-  final int lastApiCalled = DateTime.now().millisecondsSinceEpoch;
   final int apiInterval = 1000 * 60 * 10;
 
   final box = GetStorage();
@@ -27,6 +26,8 @@ class ApiNotifier extends ChangeNotifier {
   );
 
   ApiNotifier() {
+    var now = DateTime.now().millisecondsSinceEpoch;
+    box.writeInMemory("lastApiCalled", now);
     log(dotenv.env["OWM_API"]!);
     getWeather();
   }
@@ -36,6 +37,8 @@ class ApiNotifier extends ChangeNotifier {
   Position? position;
   String? cityName;
   double? temperature;
+  String? description;
+  String? main;
 
   Future<void> getPosition() async {
     Position position = await Geolocator.getCurrentPosition();
@@ -49,6 +52,8 @@ class ApiNotifier extends ChangeNotifier {
   }
 
   Future<void> getWeather() async {
+    int lastApiCalled = box.read("lastApiCalled");
+
     final currentTime = DateTime.now().millisecondsSinceEpoch;
     if ((currentTime - lastApiCalled < apiInterval) && weather != null) {
       log("API call skipped to respect interval");
@@ -59,6 +64,9 @@ class ApiNotifier extends ChangeNotifier {
       weather = null;
       cityName = box.read("cityName");
       temperature = box.read("temperature");
+      description = box.read("description");
+      main = box.read("main");
+
       return;
     }
 
@@ -75,12 +83,18 @@ class ApiNotifier extends ChangeNotifier {
       log("API Called");
 
       weather = WeatherModel.fromJson(response.data);
+      temperature = weather!.current.temp;
+      description = weather!.current.weather[0].description.toUpperCase();
+      main = weather!.current.weather[0].main;
+
       log("${position!.latitude}, ${position!.longitude}");
       log("${weather!.current.temp}");
       log("$cityName");
 
       box.writeInMemory("cityName", cityName!);
       box.writeInMemory("temperature", weather!.current.temp);
+      box.writeInMemory("description", description!);
+      box.writeInMemory("main", main!);
     } catch (e) {
       weather = null;
       cityName = box.read("cityName");
