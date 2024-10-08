@@ -9,6 +9,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
 class ApiNotifier extends ChangeNotifier {
+  final int lastApiCalled = DateTime.now().millisecondsSinceEpoch;
+  final int apiInterval = 1000 * 60 * 10;
+
   final Dio dio = Dio(
     BaseOptions(
       baseUrl: "https://api.openweathermap.org",
@@ -42,6 +45,12 @@ class ApiNotifier extends ChangeNotifier {
   }
 
   Future<void> getWeather() async {
+    final currentTime = DateTime.now().millisecondsSinceEpoch;
+    if ((currentTime - lastApiCalled < apiInterval) && weather != null) {
+      log("API call skipped to respect interval");
+      return;
+    }
+
     try {
       await getPosition();
       final response = await dio.get(
@@ -51,6 +60,8 @@ class ApiNotifier extends ChangeNotifier {
           "lon": position!.longitude,
         },
       );
+
+      log("API Called");
 
       weather = WeatherModel.fromJson(response.data);
       log("${position!.latitude}, ${position!.longitude}");
